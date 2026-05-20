@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Vexu — Conectando con MercadoLibre…</title>
+  <meta name="robots" content="noindex,nofollow">
+  <style>
+    body { font-family: system-ui; padding: 2rem; text-align: center; }
+    .spinner { font-size: 3rem; }
+    code { background: #f0f0f0; padding: 0.2rem 0.5rem; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class="spinner">⏳</div>
+  <h1>Conectando con MercadoLibre…</h1>
+  <p>Te estamos llevando de vuelta a Vexu en tu computadora.</p>
+  <p id="manual" style="display:none">
+    Si no pasa nada en 5 segundos, copiá esta URL y pegala en Vexu manualmente:<br>
+    <code id="fallback-url"></code>
+  </p>
+  <script>
+    (function () {
+      const PORT = 3000;
+      const params = new URLSearchParams(location.search);
+      const code = params.get('code');
+      const state = params.get('state');
+      const error = params.get('error');
+
+      if (error) {
+        document.body.innerHTML = `<h1>❌ MercadoLibre devolvió error</h1>
+          <p><code>${error}</code>: ${params.get('error_description') || 'sin descripción'}</p>
+          <p>Volvé a Vexu y reintentá.</p>`;
+        return;
+      }
+
+      if (!code || !state) {
+        document.body.innerHTML = `<h1>❌ Faltan parámetros</h1>
+          <p>El callback de MercadoLibre llegó sin <code>code</code> o <code>state</code>.</p>`;
+        return;
+      }
+
+      const target = `http://127.0.0.1:${PORT}/ml-callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
+
+      // Mostrar fallback manual tras 5s por si Vexu no está corriendo
+      setTimeout(() => {
+        document.getElementById('manual').style.display = 'block';
+        document.getElementById('fallback-url').textContent = target;
+      }, 5000);
+
+      window.location.href = target;
+    })();
+  </script>
+</body>
+</html>
